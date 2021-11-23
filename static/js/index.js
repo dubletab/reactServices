@@ -2,8 +2,8 @@
     let myArr;
 
     
-    ajaxCallToComp();
-    setInterval(ajaxCallToCompInterval, 60000);
+    // ajaxCallToComp();
+    // setInterval(ajaxCallToCompInterval, 60000);
 
     function Wrapper(){
         [count, setCount] = React.useState(myArr);
@@ -78,41 +78,54 @@
         )
     }
 
-    function ajaxCallToComp() {
-        $.ajax({
-            type: "POST",
-            url: window.location,
-            dataType: 'json',
-            data: {type: 'getAlerts'},
-            success: function(msg){
-                if (msg['data'].length > 0) {
-                    myArr = Array.from(msg['data']);
+    fetch('../static/json/message.json')
+        .then(response => response.json())
+        .then(json => {
+            myArr = Array.from(json['data']);
                     ReactDOM.render(
                         <Wrapper/>,
                         document.getElementById('root')
                     );
                     console.log('Данные загружены');
-                }
+        });
 
-            }
-        });  
-    }
 
-    function ajaxCallToCompInterval() {
-        $.ajax({
-            type: "POST",
-            url: window.location,
-            dataType: 'json',
-            data: {type: 'getAlerts'},
-            success: function(msg){
-                if (msg['data'].length > 0) {
-                    setCount(Array.from(msg['data']));
-                    console.log('Данные обновлены');
-                }
 
-            }
-        });  
-    }
+    // function ajaxCallToComp() {
+    //     $.ajax({
+    //         type: "POST",
+    //         url: window.location,
+    //         dataType: 'json',
+    //         data: {type: 'getAlerts'},
+    //         success: function(msg){
+    //             if (msg['data'].length > 0) {
+    //                 myArr = Array.from(msg['data']);
+    //                 ReactDOM.render(
+    //                     <Wrapper/>,
+    //                     document.getElementById('root')
+    //                 );
+    //                 console.log('Данные загружены');
+    //             }
+
+    //         }
+    //     });  
+    // }
+
+    // function ajaxCallToCompInterval() {
+    //     $.ajax({
+    //         type: "POST",
+    //         url: window.location,
+    //         dataType: 'json',
+    //         data: {type: 'getAlerts'},
+    //         success: function(msg){
+    //             if (msg['data'].length > 0) {
+    //                 setCount(Array.from(msg['data']));
+    //                 console.log('Данные обновлены');
+    //             }
+
+    //         }
+    //     });  
+    // }
 
 
     
