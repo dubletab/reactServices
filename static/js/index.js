@@ -78,7 +78,7 @@
         )
     }
 
-    fetch('../static/json/message.json')
+    fetch('./static/json/message.json')
         .then(response => response.json())
         .then(json => {
             myArr = Array.from(json['data']);
