@@ -1,131 +1,110 @@
-    let count, setCount;
-    let myArr;
 
-    
-    // ajaxCallToComp();
-    // setInterval(ajaxCallToCompInterval, 60000);
+    const Wrapper = () => {
+        const [loading, setLoading] = React.useState(true);
+        const [data, setData] = React.useState([]);
 
-    function Wrapper(){
-        [count, setCount] = React.useState(myArr);
+        // const updateData = async (url="")=>{
+        //     const response = await fetch(url, {
+        //         method: 'POST'
+        //     });
+        //     const {data} = await response.json();
+        //     return data;
+        // }
+
+        const updateData = async (url="")=>{
+            const response = await fetch(url);
+            const {data} = await response.json();
+            return data;
+        }
+
+        const getData = () => {
+            updateData("./static/json/message.json")
+            .then((data) => {
+                if(data.length > 0){
+                    setLoading(false);
+                    setData(data);
+                    console.log('Данные загружены');
+                }
+            })
+            .catch(()=>{
+                console.log('Ошибка при загрузке данных');
+            });
+        }
+
+        React.useEffect(() => {
+            if(loading) {
+                getData();
+                const intervalId = setInterval(getData, 3000);
+            }
+            return () => {clearInterval(intervalId)};
+        }, []);
+
+        if(loading) return (
+            <div>
+                <Spinner/>
+            </div> 
+        )   
+
         return(
             <div className="wrapper">
             {
-                count.map((entry, index) =>{
+                data.map((data, index) =>{
                     return <ServerDiv 
-                        key={index} 
-                        name={entry.shortdesc}
-                        timer={entry.uptime}
-                        status={entry.state}
-                        id={entry.id}
-                        disk={entry.disk}
-                        cpu={entry.cpu}
-                        ram={entry.ram}/>
+                        data={data}
+                        key={index}/>
                 })
             }
         </div>
         )
     }
 
-
-    function ServerDiv(props){
-        let cardStyle = {};
-        cardStyle.background = props.status == 'DOWN' ? 'red' : 'none';
-        let cpuStyle = {};
-        cpuStyle.width = (100 - props.cpu) + '%';
-        let ramStyle = {};
-        ramStyle.width = (100 - props.ram) + '%';
-        let diskStyle = {};
-        diskStyle.width = (100 - props.disk) + '%';
-
+    const ServerDiv = ({data: {desc, uptime, status, id, disk, cpu, ram}}) => {
+        const cardStyle = {
+            background: status == 'DOWN' ? 'red' : 'none'
+        };
         return(
-        <div className="server" id={props.id} style={cardStyle}>
+        <div className="server" id={id} style={cardStyle}>
             <div className="server__head">
-                <div className="title">{props.name}</div>
-                <div className="timer">{props.timer === null ? 'Нет данных' : props.timer + 'д'}</div>
+                <div className="title">{desc}</div>
+                <div className="timer">{uptime === null ? 'Нет данных' : uptime + 'д'}</div>
             </div>
             <div className="server__body">
-                <div className="cpu">
-                    <div className="cpu__title">CPU</div>
-                    <div className="cpu__status status">
-                        <div className="cpu__bar bar">
-                            <div className="cpu__invisiblebar invisiblebar" style={cpuStyle}></div>
-                        </div>
-                        <div className="cpu__percentage percentage">{props.cpu === null ? 'Н/Д' : props.cpu + '%'}</div>
-                    </div>
-                </div>
-
-                <div className="ram">
-                    <div className="ram__title">RAM</div>
-                    <div className="ram__status status">
-                        <div className="ram__bar bar">
-                            <div className="ram__invisiblebar invisiblebar" style={ramStyle}></div>
-                        </div>
-                        <div className="ram__percentage percentage">{props.ram === null ? 'Н/Д' : props.ram + '%'}</div>
-                    </div>
-                </div>
-
-                <div className="disk">
-                    <div className="disk__title">DISK</div>
-                    <div className="disk__status status">
-                        <div className="disk__bar bar">
-                            <div className="disk__invisiblebar invisiblebar" style={diskStyle}></div>
-                        </div>
-                        <div className="disk__percentage percentage">{props.disk === null ? 'Н/Д' : props.disk + '%'}</div>
-                    </div>
-                </div>
+                <ParameterIndicator name='cpu' countUsed={cpu}/>
+                <ParameterIndicator name='ram' countUsed={ram}/>
+                <ParameterIndicator name='disk' countUsed={disk}/>
             </div>
         </div>
         )
     }
 
-    fetch('./static/json/message.json')
-        .then(response => response.json())
-        .then(json => {
-            myArr = Array.from(json['data']);
-                    ReactDOM.render(
-                        <Wrapper/>,
-                        document.getElementById('root')
-                    );
-                    console.log('Данные загружены');
-        });
+    const ParameterIndicator = ({name, countUsed}) =>{
+        const style = {
+            width: `${(100 - countUsed)}%`
+        };
+        return(
+        <div className={name}>
+            <div className={`${name}__title`}>{name.toUpperCase()}</div>
+            <div className={`${name}__status status`}>
+                <div className={`${name}__bar bar`}>
+                    <div className={`${name}__invisiblebar invisiblebar`} style={style}></div>
+                </div>
+                <div className={`${name}__percentage percentage`}>{countUsed === null ? 'Н/Д' : countUsed + '%'}</div>
+            </div>
+        </div>
+        )
+    }
+
+    const Spinner = () => {
+        return(
+            <div className = 'spin-wrapper'>
+                <div className = 'spinner'>
+                </div>
+            </div>
+        )
+    }
 
 
-
-    // function ajaxCallToComp() {
-    //     $.ajax({
-    //         type: "POST",
-    //         url: window.location,
-    //         dataType: 'json',
-    //         data: {type: 'getAlerts'},
-    //         success: function(msg){
-    //             if (msg['data'].length > 0) {
-    //                 myArr = Array.from(msg['data']);
-    //                 ReactDOM.render(
-    //                     <Wrapper/>,
-    //                     document.getElementById('root')
-    //                 );
-    //                 console.log('Данные загружены');
-    //             }
-
-    //         }
-    //     });  
-    // }
-
-    // function ajaxCallToCompInterval() {
-    //     $.ajax({
-    //         type: "POST",
-    //         url: window.location,
-    //         dataType: 'json',
-    //         data: {type: 'getAlerts'},
-    //         success: function(msg){
-    //             if (msg['data'].length > 0) {
-    //                 setCount(Array.from(msg['data']));
-    //                 console.log('Данные обновлены');
-    //             }
-
-    //         }
-    //     });  
-    // }
-
-
-    
+    ReactDOM.render(
+        <Wrapper/>,
+        document.getElementById('root')
+    );
