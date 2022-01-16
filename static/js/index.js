@@ -34,7 +34,7 @@
         React.useEffect(() => {
             if(loading) {
                 getData();
-                const intervalId = setInterval(getData, 3000);
+                const intervalId = setInterval(getData, 30000);
             }
             return () => {clearInterval(intervalId)};
         }, []);
